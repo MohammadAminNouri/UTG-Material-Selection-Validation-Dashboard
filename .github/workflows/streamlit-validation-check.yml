@@ -23,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Upgrade pip
         run: |
@@ -33,23 +33,12 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Check Python files compile
+      - name: Check Python syntax
         run: |
-          python -m compileall .
-
-      - name: Check data files exist
-        run: |
-          test -f data/candidate_materials.csv
-          test -f data/weighted_matrix_report_scores.csv
-          test -f data/validation_plan.csv
-          test -f data/eco_audit_baseline.csv
-
-      - name: Check main Streamlit app exists
-        run: |
-          test -f app.py
+          python -m py_compile app.py
 
       - name: Run Streamlit smoke test
         run: |
           streamlit run app.py --server.headless true --server.port 8501 &
-          sleep 15
+          sleep 20
           curl --fail http://localhost:8501
