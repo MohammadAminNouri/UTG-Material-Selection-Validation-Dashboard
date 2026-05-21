@@ -81,8 +81,16 @@ elif page == "2. Candidate data and Ashby indices":
             "thermal_mismatch_alphaE"
         ])
         fig = px.bar(melt, x="material", y="value", color="variable", barmode="group", title="Raw index comparison")
-    fig.update_traces(textposition="top center")
-    st.plotly_chart(fig, use_container_width=True)
+   # Plotly trace-specific text placement
+# Scatter traces accept values such as "top center".
+# Bar traces accept values such as "outside", "inside", "auto", or "none".
+for trace in fig.data:
+    if trace.type == "scatter":
+        trace.update(textposition="top center")
+    elif trace.type == "bar":
+        trace.update(textposition="outside")
+
+st.plotly_chart(fig, use_container_width=True)
 
 elif page == "3. Weighted decision matrix":
     st.header("Weighted decision matrix")
