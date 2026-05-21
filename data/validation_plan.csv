@@ -1,0 +1,11 @@
+validation_item,status,method_or_result,report_use
+FEA folding simulation,Completed in current project,+658.76 MPa tensile / -693.17 MPa compressive near fold,Numerical validation only; not pass/fail proof
+Chemical strengthening trial,Future work,KNO3 ion exchange; verify surface compressive stress and depth of layer,Required because bulk strength alone is insufficient
+Static bend-radius test,Future work,Two-point bending / U-shape folding,Confirms bend radius margin
+Cyclic folding fatigue,Future work,Repeated folding to target cycle count,Confirms fatigue life
+Edge-strength inspection,Future work,edge microscopy + edge bend test,Edges are critical flaw locations
+Scratch / hardness testing,Future work,Vickers/pencil/scratch testing before and after coating,Confirms touch-surface durability
+Pen-drop / indentation test,Future work,local impact/contact test,Validates user-contact damage resistance
+Optical inspection,Future work,"haze, transmission, distortion, defects",Confirms display quality
+Lamination test,Future work,adhesive/interlayer compatibility and neutral-axis effects,Checks full stack behavior
+Manufacturing trial,Future work,"yield, thickness uniformity, defect rate",Confirms production feasibility

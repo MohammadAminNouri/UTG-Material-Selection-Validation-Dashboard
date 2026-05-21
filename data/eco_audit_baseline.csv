@@ -1,0 +1,6 @@
+phase,energy_MJ,co2_kg
+Material,0.0241,0.00158
+Manufacture,0.0205,0.00163
+Transport,0.169,0.012
+Use,76.1,2.49
+Disposal,0.00031,2.17e-05

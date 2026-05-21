@@ -1,0 +1,8 @@
+block,weight,preference,basis
+foldability,0.25,higher,bending_index_flex_over_E + inverse bending stress + base strength margin
+fracture_flaw_tolerance,0.25,higher,"KIC, KIC/E and KIC²/E"
+surface_durability,0.15,higher,HV and HV/rho
+thermal_compatibility,0.1,mixed,low alphaE and high thermal shock
+optical_application_relevance,0.1,higher,reported application relevance
+cost_sustainability,0.1,mixed,"low price, low CO2, low embodied energy, low water"
+utg_validation_risk,0.05,higher,chemical strengthening / UTG relevance score
