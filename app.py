@@ -117,7 +117,10 @@ def critical_flaw_um(KIC_mpa_sqrt_m: float, sigma_mpa: float, Y: float = 1.12) -
     return a_m * 1e6
 
 
-def show_df(df: pd.DataFrame, height: int | None = None) -> None:
+def show_df(df: pd.DataFrame, height: int | str | None = "auto") -> None:
+    """Safe dataframe renderer for recent Streamlit versions."""
+    if height is None:
+        height = "auto"
     st.dataframe(df, use_container_width=True, hide_index=True, height=height)
 
 
