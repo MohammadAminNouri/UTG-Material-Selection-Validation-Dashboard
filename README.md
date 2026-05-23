@@ -24,13 +24,11 @@ The material ranking is based on the following indices:
 | Index | Formula | Purpose |
 |---|---:|---|
 | Elastic foldability | `M1 = sigma_f / E` | Evaluates the balance between flexural strength and Young’s modulus for repeated bending |
-| Fracture toughness versus flexural strength | `KIC` and `sigma_f` scored together | Rewards materials with both high fracture toughness and high flexural strength |
-| Diagnostic crack-tolerance ratio | `M2 = KIC / sigma_f` | Used as a supporting diagnostic value, not as the only fracture score |
-| Thermal-mismatch resistance | `M3 = 1 / (E * alpha)` | Favors materials with lower thermal-stress tendency in the display stack |
-| Additional fracture reserve | `M4 = (KIC / E)^2` | Provides a toughness-to-stiffness reserve check |
-| Fracture-energy reference | `KIC^2 / E` | Used as a sensitivity check for brittle fracture-energy resistance |
+| Crack resistance | `M2 = KIC^2 / E` | Evaluates brittle fracture-energy resistance against crack growth |
+| Flaw tolerance | `M3 = KIC / sigma_f` | Used as a flaw-tolerance diagnostic while retaining a strength gate in the final score |
+| Thermal-mismatch resistance | `M4 = 1 / (E * alpha)` | Favors materials with lower thermal-stress tendency in the display stack |
 
-Hardness is retained as a supporting/pass-fail property rather than a main ranking index, because the final methodology is controlled mainly by bending, crack resistance, thermal mismatch, and fracture-reserve behavior.
+Hardness is retained as a supporting/pass-fail property rather than a main ranking index, because the final methodology is controlled mainly by bending, crack resistance, flaw tolerance, and thermal-mismatch behavior.
 
 ## Weighted Decision Matrix
 
@@ -38,13 +36,13 @@ The dashboard applies the following weighting logic:
 
 | Selection block | Weight | Role in material selection |
 |---|---:|---|
-| Elastic foldability | 35% | Main requirement for repeated folding without brittle fracture |
-| Fracture/crack resistance | 30% | Accounts for flaw-controlled failure from surface scratches, edge defects, and indentation marks |
-| Thermal compatibility | 15% | Reduces thermal-mismatch risk in the laminated display stack |
-| Optical/application relevance | 10% | Supports suitability for transparent display-cover use |
-| Cost and sustainability | 10% | Includes price, CO₂ footprint, embodied energy, water use, and recycling indicators |
+| Elastic foldability | 30 | Main requirement for repeated folding without brittle fracture |
+| Crack resistance | 25 | Accounts for crack-growth resistance using toughness and fracture-energy behavior |
+| Flaw tolerance | 25 | Accounts for survival in the presence of surface and edge defects |
+| Thermal compatibility | 20 | Reduces thermal-mismatch risk in the laminated display stack |
+| Cost and sustainability | 10 | Includes price, CO₂ footprint, embodied energy, water use, and recycling indicators |
 
-With these weights, the dashboard selects **Alumino silicate 1720** as the strongest final material candidate.
+The dashboard normalizes the weights internally before computing the final score. With the default report weights, the dashboard selects **Alumino silicate 1720** as the strongest final material candidate.
 
 ## Machine-Learning Support
 
@@ -60,11 +58,11 @@ The machine-learning module is used for:
 - checking the stability of the material ranking under property variation;
 - supporting the validation plan.
 
-The model is not used as a real fold-life predictor, because experimental cyclic-folding failure data are not available. Its role is to support the decision matrix and identify which properties should be prioritized during physical validation.
+The model is not used as a real fold-life predictor because experimental cyclic-folding failure data are not available. Its role is to support the decision matrix and identify which properties should be prioritized during physical validation.
 
 ## Final Material Decision
 
-The dashboard supports the selection of **Alumino silicate 1720** because it provides the strongest overall balance of elastic foldability, flexural strength, fracture toughness, fracture toughness versus flexural strength performance, cost, production CO₂, embodied energy, and application relevance.
+The dashboard supports the selection of **Alumino silicate 1720** because it provides the strongest overall balance of elastic foldability, flexural strength, fracture toughness, fracture-energy resistance, cost, production CO₂, embodied energy, and application relevance.
 
 The remaining candidates are retained as validation comparators:
 
@@ -82,3 +80,21 @@ The result is a robust base-material selection, not final product certification.
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
+```
+
+## Streamlit Cloud Settings
+
+- Main file path: `app.py`
+- Python version: `3.11`
+
+## Files to Replace in GitHub
+
+Replace the existing files with:
+
+- `app.py`
+- `requirements.txt`
+- `runtime.txt`
+
+Optionally add:
+
+- `.streamlit/config.toml`
