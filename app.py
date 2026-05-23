@@ -98,8 +98,8 @@ RANGES: Dict[str, Dict[str, Tuple[float, float]]] = {
 
 DEFAULT_WEIGHTS = {
     "Foldability": 30.0,
-    "Crack resistance": 25.0,
-    "Flaw tolerance": 25.0,
+    "Crack resistance": 20.0,
+    "Flaw tolerance": 20.0,
     "Thermal compatibility": 20.0,
     "Cost and sustainability": 10.0,
 }
@@ -335,7 +335,7 @@ if page == "Decision-making matrix":
     st.subheader("Weighted decision matrix")
     st.write(
         "This page is the report decision-making matrix. It combines the new index logic with "
-        "the report weights, then normalizes the weights internally so the final score remains mathematically valid. "
+        "the report weights. The new weights sum to 100%, so the normalized values used internally match the report values. "
         "The raw flaw-tolerance ratio is shown, but the final flaw score is strength-gated so that "
         "a weak material is not overranked only because a lower flexural strength inflates KIC/σf."
     )
@@ -353,6 +353,12 @@ if page == "Decision-making matrix":
         ],
     })
     show_df(weight_table)
+
+    st.markdown(
+        "**Weighted score formula:** "
+        "`0.30(Foldability) + 0.20(Crack resistance) + 0.20(Flaw tolerance) + "
+        "0.20(Thermal compatibility) + 0.10(Cost and sustainability)`"
+    )
     cols = [
         "Rank",
         "Decision",

@@ -45,12 +45,16 @@ The dashboard applies the report weighting logic:
 | Selection block | Report weight | Role in material selection |
 |---|---:|---|
 | Elastic foldability | 30% | Main requirement for repeated folding without brittle fracture |
-| Crack resistance | 25% | Fracture-energy resistance using `KIC^2 / E` |
-| Flaw tolerance | 25% | Ability to remain functional in the presence of defects |
+| Crack resistance | 20% | Fracture-energy resistance using `KIC^2 / E` and high `KIC` with sufficient strength |
+| Flaw tolerance | 20% | Ability to remain functional in the presence of defects |
 | Thermal compatibility | 20% | Reduces thermal-mismatch risk in the laminated display stack |
 | Cost and sustainability | 10% | Includes price, CO2 footprint, embodied energy, water use, critical elements, and recycling indicators |
 
-Because the report weights sum to 110%, the app normalizes them internally before calculating the final score. This preserves the same priority order while keeping the weighted score mathematically valid.
+The report weights sum to 100%, and the app also normalizes them internally as a safeguard. With the default values, the normalized values are identical to the report weights.
+
+The weighted score is calculated as:
+
+`0.30(Foldability) + 0.20(Crack resistance) + 0.20(Flaw tolerance) + 0.20(Thermal compatibility) + 0.10(Cost and sustainability)`
 
 With these weights, the dashboard selects **Alumino silicate 1720** as the strongest final material candidate.
 
