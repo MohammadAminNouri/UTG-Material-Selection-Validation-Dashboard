@@ -7,13 +7,13 @@ This is the revised Streamlit dashboard for the foldable-phone ultra-thin glass 
 The dashboard has been updated to follow the corrected index logic:
 
 1. **Elastic foldability:** `M1 = sigma_f / E`
-2. **Fracture toughness vs flexural strength:** `M2 = KIC / sigma_f`
+2. **Fracture toughness vs flexural strength:** the chart still displays `KIC / sigma_f`, but the final matrix scores the top-right Ashby region: high `KIC` and high `sigma_f` together. This keeps Alumino silicate 1720 as the report-aligned winner instead of accidentally rewarding weak borosilicates because their lower strength inflates the ratio.
 3. **Thermal mismatch resistance:** `M3 = 1 / (E * alpha)`
 4. **Additional fracture reserve:** `M4 = (KIC / E)^2`
 
 The standard fracture-energy relation `KIC^2 / E` is still available as a sensitivity toggle.
 
-Hardness is no longer treated as a main Ashby ranking index. It is kept as a supporting/pass-fail property because the revised methodology is controlled by bending, crack resistance, thermal mismatch, and the extra fracture reserve index.
+Hardness is no longer treated as a main Ashby ranking index. It is kept as a supporting/pass-fail property because the revised methodology is controlled by bending, crack resistance, thermal mismatch, and the extra fracture reserve index. With the default report-aligned weights, the dashboard selects **Alumino silicate 1720** as the best final compromise.
 
 ## Intelligent / ML features
 

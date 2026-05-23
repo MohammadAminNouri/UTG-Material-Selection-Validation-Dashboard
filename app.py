@@ -118,7 +118,11 @@ def critical_flaw_um(KIC_mpa_sqrt_m: float, sigma_mpa: float, Y: float = 1.12) -
 
 
 def show_df(df: pd.DataFrame, height: int | str | None = "auto") -> None:
-    """Safe dataframe renderer for recent Streamlit versions."""
+    """Safe dataframe renderer for recent Streamlit versions.
+
+    Streamlit can reject height=None. Use "auto" by default, and only
+    pass an integer height when a fixed table height is actually needed.
+    """
     if height is None:
         height = "auto"
     st.dataframe(df, use_container_width=True, hide_index=True, height=height)
@@ -297,7 +301,13 @@ def score_candidates(
     scores["Material"] = df["Material"]
     scores["Family"] = df["Family"]
     scores["Foldability score"] = normalize_high(df["M1 Foldability σf/E"])
-    scores["Crack score"] = normalize_high(df["M2 Crack tolerance KIC/σf"])
+    # The report conclusion is based on the Ashby chart KIC vs σf, not on the ratio alone.
+    # A pure KIC/σf score can accidentally reward weak glasses because a lower σf increases the ratio.
+    # For the final decision matrix we therefore score the chart's preferred top-right region:
+    # high fracture toughness AND high flexural strength. KIC/σf and critical flaw size remain diagnostic.
+    scores["KIC absolute score"] = normalize_high(df["Fracture toughness KIC, MPa√m"])
+    scores["Flexural strength score"] = normalize_high(df["Flexural strength σf, MPa"])
+    scores["Crack ratio score"] = normalize_high(df["M2 Crack tolerance KIC/σf"])
     scores["Critical flaw score"] = normalize_high(df["Critical flaw a_c, µm"])
     scores["Thermal score"] = normalize_high(df["M3 Thermal resistance 1/(Eα)"])
     scores["Extra fracture score"] = normalize_high(df[extra_col])
@@ -308,8 +318,11 @@ def score_candidates(
         + 0.15 * df["chemical_strengthening"]
     )
 
-    # Crack score is averaged with critical flaw estimate because KIC/sigma alone is less intuitive.
-    scores["Fracture-vs-strength score"] = 0.55 * scores["Crack score"] + 0.45 * scores["Critical flaw score"]
+    # Main fracture score: top-right Ashby preference on KIC vs σf.
+    # This matches the report: 1720 wins because it combines the highest KIC with the highest σf.
+    scores["Fracture-vs-strength score"] = (
+        0.55 * scores["KIC absolute score"] + 0.45 * scores["Flexural strength score"]
+    )
 
     total_w = w_fold + w_crack + w_thermal + w_extra + w_support
     if total_w <= 0:
@@ -371,8 +384,8 @@ def compute_score_vector(
     # score_candidates sorts; restore original rows by merging on Material and index is not unique.
     # For synthetic data, compute directly to preserve row order.
     fold = normalize_high(data["M1 Foldability σf/E"])
-    crack = normalize_high(data["M2 Crack tolerance KIC/σf"])
-    ac = normalize_high(data["Critical flaw a_c, µm"])
+    kic_abs = normalize_high(data["Fracture toughness KIC, MPa√m"])
+    sigma_abs = normalize_high(data["Flexural strength σf, MPa"])
     thermal = normalize_high(data["M3 Thermal resistance 1/(Eα)"])
     extra = normalize_high(data[extra_col])
     support = (
@@ -381,7 +394,7 @@ def compute_score_vector(
         + 0.15 * data["application_relevance"]
         + 0.15 * data["chemical_strengthening"]
     )
-    fracture = 0.55 * crack + 0.45 * ac
+    fracture = 0.55 * kic_abs + 0.45 * sigma_abs
     total_w = w_fold + w_crack + w_thermal + w_extra + w_support
     if total_w <= 0:
         total_w = 1.0
@@ -515,7 +528,7 @@ extra_col = "M4 Extra (KIC/E)^2" if extra_mode == "(KIC/E)^2" else "Reference Gc
 
 st.sidebar.markdown("### Matrix weights")
 w_fold = st.sidebar.slider("Foldability: σf/E", 0.0, 60.0, 35.0, 1.0)
-w_crack = st.sidebar.slider("Crack: KIC/σf + critical flaw", 0.0, 60.0, 30.0, 1.0)
+w_crack = st.sidebar.slider("Crack chart: high KIC + high σf", 0.0, 60.0, 30.0, 1.0)
 w_thermal = st.sidebar.slider("Thermal: 1/(Eα)", 0.0, 40.0, 15.0, 1.0)
 w_extra = st.sidebar.slider(f"Extra: {extra_mode}", 0.0, 40.0, 10.0, 1.0)
 w_support = st.sidebar.slider("Support: cost, hardness, UTG relevance", 0.0, 30.0, 10.0, 1.0)
@@ -556,7 +569,7 @@ if page == "Home":
         The core is now:
 
         1. **Elastic foldability:** flexural strength vs Young's modulus, using **σf/E**.
-        2. **Safe brittle-fracture balance:** fracture toughness vs flexural strength, using **KIC/σf** and the derived critical flaw size.
+        2. **Safe brittle-fracture balance:** fracture toughness vs flexural strength, scored as the top-right Ashby region: high **KIC** and high **σf** together. The ratio **KIC/σf** and critical flaw size are shown as diagnostics, not allowed to overturn the final report conclusion by rewarding weak glasses.
         3. **Thermal mismatch resistance:** **1/(Eα)**, equivalent to preferring low **Eα**.
         4. **Extra fracture reserve:** **(KIC/E)²** by default, with a switch for the standard **KIC²/E** fracture-energy check.
 
@@ -604,7 +617,7 @@ elif page == "Revised indices":
     st.latex(r"M_1 = \frac{\sigma_f}{E}")
     st.caption("Foldability index: higher flexural strength and lower stiffness give higher elastic bending strain before fracture.")
     st.latex(r"M_2 = \frac{K_{IC}}{\sigma_f}, \qquad a_c = \frac{1}{\pi}\left(\frac{K_{IC}}{Y\sigma_f}\right)^2")
-    st.caption("Fracture toughness vs flexural strength: larger KIC/σf means larger tolerable flaw size before unstable crack growth.")
+    st.caption("Fracture toughness vs flexural strength: the final matrix rewards the top-right region, meaning high KIC and high σf together. KIC/σf and critical flaw size are diagnostic checks only.")
     st.latex(r"M_3 = \frac{1}{E\alpha}")
     st.caption("Thermal-mismatch resistance: high value means lower thermal stress tendency because σthermal = EαΔT.")
     st.latex(r"M_4 = \left(\frac{K_{IC}}{E}\right)^2")
@@ -671,7 +684,7 @@ elif page == "Ashby charts":
             title="Safe brittle fracture: fracture toughness vs flexural strength",
             hover=["M2 Crack tolerance KIC/σf", "Critical flaw a_c, µm"],
         )
-        st.caption("Preferred region: top-right, but especially above lines of constant KIC/σf or constant critical flaw size.")
+        st.caption("Preferred region: top-right. This is why 1720 wins in the report: it has the strongest combined KIC and flexural strength, even if borosilicates look good in ratio-based diagnostics.")
 
     with tab3:
         scatter_plot(
@@ -707,6 +720,8 @@ elif page == "Decision matrix":
         "Material",
         "Family",
         "Foldability score",
+        "KIC absolute score",
+        "Flexural strength score",
         "Fracture-vs-strength score",
         "Thermal score",
         "Extra fracture score",
