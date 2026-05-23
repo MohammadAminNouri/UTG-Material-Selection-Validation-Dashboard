@@ -1,30 +1,25 @@
-# Foldable Phone Glass UTG Validation Dashboard
+# UTG Material Selection + ML Ranking Dashboard — revised version
 
-This repository is a digital companion to a written material-selection report for a foldable phone ultra-thin glass cover window.
+This is the revised Streamlit dashboard for the foldable-phone ultra-thin glass material-selection report.
 
-## Selected material
+## What changed
 
-**Alumino silicate 1720** is selected as the strongest compromise before final experimental validation.
+The dashboard has been updated to follow the corrected index logic:
 
-## What the app does
+1. **Elastic foldability:** `M1 = sigma_f / E`
+2. **Fracture toughness vs flexural strength:** `M2 = KIC / sigma_f`
+3. **Thermal mismatch resistance:** `M3 = 1 / (E * alpha)`
+4. **Additional fracture reserve:** `M4 = (KIC / E)^2`
 
-- Reproduces the five-material candidate shortlist.
-- Calculates Ashby-style indices:
-  - flexural strength / Young's modulus
-  - fracture toughness / Young's modulus
-  - fracture toughness² / Young's modulus
-  - hardness / density
-  - thermal expansion × Young's modulus
-- Recreates the weighted decision matrix used in the report.
-- Adds sensitivity testing for weights.
-- Adds a safe ML decision-support module.
-- Adds a bending and chemical-strengthening check.
-- Adds Eco Audit sensitivity.
-- Provides a validation checklist.
+The standard fracture-energy relation `KIC^2 / E` is still available as a sensitivity toggle.
 
-## Important limitation
+Hardness is no longer treated as a main Ashby ranking index. It is kept as a supporting/pass-fail property because the revised methodology is controlled by bending, crack resistance, thermal mismatch, and the extra fracture reserve index.
 
-The ML module is **not** a real fold-life predictor. It is a decision-support surrogate trained to reproduce the report's weighted material-selection score. Final approval still requires chemical strengthening validation, edge inspection, bend-radius testing, cyclic folding, scratch/pen-drop testing, optical inspection, lamination testing, and manufacturing trials.
+## Intelligent / ML features
+
+The ML page uses property-range sampling to create synthetic variations around the five Granta candidates. A random-forest model is trained as a transparent **decision-support surrogate** to reproduce the revised physics-weighted score.
+
+It is **not** a real fold-life predictor because there is no experimental cyclic-folding failure dataset.
 
 ## Run locally
 
@@ -33,8 +28,11 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Streamlit Cloud
+## Streamlit Cloud settings
 
-Use:
 - Main file path: `app.py`
-- Python version: 3.11 or later
+- Python version: `3.11`
+
+## Files to replace in GitHub
+
+Replace the existing `app.py`, `requirements.txt`, `runtime.txt`, and optionally add `.streamlit/config.toml`.
