@@ -320,21 +320,39 @@ kpi2.metric("Top weighted score", f"{ranked.iloc[0]['Weighted score']:.2f} / 5")
 kpi3.metric("Shortlisted materials", len(ranked))
 kpi4.metric("Core indices", "4")
 
-tabs = st.tabs([
-    "Ranking matrix",
-    "Ashby charts",
-    "Raw indices",
-    "ML sensitivity",
-    "Validation logic",
-])
+page = st.sidebar.radio(
+    "Dashboard page",
+    [
+        "Decision-making matrix",
+        "Ashby charts",
+        "Raw indices",
+        "ML sensitivity",
+        "Validation logic",
+    ],
+)
 
-with tabs[0]:
+if page == "Decision-making matrix":
     st.subheader("Weighted decision matrix")
     st.write(
-        "The matrix scores the four report indices and the supporting cost/sustainability block. "
+        "This page is the report decision-making matrix. It combines the new index logic with "
+        "the report weights, then normalizes the weights internally so the final score remains mathematically valid. "
         "The raw flaw-tolerance ratio is shown, but the final flaw score is strength-gated so that "
         "a weak material is not overranked only because a lower flexural strength inflates KIC/σf."
     )
+
+    weight_table = pd.DataFrame({
+        "Selection block": list(DEFAULT_WEIGHTS.keys()),
+        "Report weight": [f"{DEFAULT_WEIGHTS[k]:.0f}%" for k in DEFAULT_WEIGHTS],
+        "Normalized weight used in app": [f"{100*normalized[k]:.1f}%" for k in DEFAULT_WEIGHTS],
+        "Role": [
+            "Primary resistance to repeated bending",
+            "Energy-based crack resistance using KIC²/E and strength/toughness gating",
+            "Defect tolerance using KIC/σf, but not allowed to reward weak glass alone",
+            "Thermal-mismatch reduction using 1/(Eα)",
+            "Supporting feasibility using price, CO₂, energy, water, critical elements and recycling",
+        ],
+    })
+    show_df(weight_table)
     cols = [
         "Rank",
         "Decision",
@@ -373,9 +391,9 @@ with tabs[0]:
     fig2.update_layout(yaxis_range=[0, 5.2], xaxis_tickangle=-20)
     st.plotly_chart(fig2, use_container_width=True)
 
-with tabs[1]:
+elif page == "Ashby charts":
     st.subheader("Ashby-style charts")
-    chart_df = add_indices(base_df).reset_index()
+    chart_df = ranked.reset_index()
     c1, c2 = st.columns(2)
     with c1:
         fig = px.scatter(
@@ -393,7 +411,7 @@ with tabs[1]:
             x="Flexural strength MPa",
             y="KIC MPa√m",
             color="Material",
-            size="Crack resistance score" if "Crack resistance score" in ranked.columns else None,
+            size="Crack resistance score",
             title="Fracture toughness vs flexural strength",
         )
         st.plotly_chart(fig, use_container_width=True)
@@ -419,7 +437,7 @@ with tabs[1]:
         )
         st.plotly_chart(fig, use_container_width=True)
 
-with tabs[2]:
+elif page == "Raw indices":
     st.subheader("Calculated indices from midpoint properties")
     index_cols = [
         "E GPa",
@@ -441,7 +459,7 @@ with tabs[2]:
         "as safer only because its strength is low."
     )
 
-with tabs[3]:
+elif page == "ML sensitivity":
     st.subheader("Machine-learning sensitivity module")
     n = st.slider("Synthetic samples per material", 100, 3000, 800, 100)
     seed = st.number_input("Random seed", value=42, step=1)
@@ -473,7 +491,7 @@ with tabs[3]:
     fig.update_layout(xaxis_tickangle=-20)
     st.plotly_chart(fig, use_container_width=True)
 
-with tabs[4]:
+elif page == "Validation logic":
     st.subheader("Interpretation for validation planning")
     st.markdown(
         """
